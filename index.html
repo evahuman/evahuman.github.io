@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Expressive Gaussian Human Avatars from Monocular RGB Video">
+  <meta name="keywords" content="Expressive, 3DGS, 3D Gaussian Splatting, Human Avatar">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="icon" type="image/x-icon" href="/evahuman.github.io/media/pipeline/Figure1.png">
+  
+  <title>Expressive Gaussian Human Avatars from Monocular RGB Video</title>
+
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <!-- custom additional scripts -->
+
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- https://docs.mathjax.org/en/latest/web/configuration.html#configuration-using-an-in-line-script -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+  </script>
+
+  <script
+  defer
+  src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"
+  />
+
+  <!-- swiper -->
+  <!-- https://swiperjs.com/demos -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+  <link rel="image_src" href="./media/pipeline.png">
+  
+  <!-- img comparison slider -->
+  <!-- https://github.com/sneas/img-comparison-slider -->
+  <style>
+    .before,
+    .after {
+      margin: 0;
+    }
+  
+    .before figcaption,
+    .after figcaption {
+      background: #fff;
+      border: 1px solid #c0c0c0;
+      border-radius: 4px;
+      color: #2e3452;
+      opacity: 0.8;
+      padding: 4px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      line-height: 70%;
+    }
+  
+    .before figcaption {
+      left: 4px;
+    }
+  
+    .after figcaption {
+      right: 4px;
+    }
+  </style>
+
+<style>
+  .button-container_teaser {
+      display: flex;       
+      justify-content: center; 
+      align-items: center;
+  }
+
+  .glow-button {
+      position: relative;
+      display: inline-block;
+      padding: 2px;
+      border-radius: 10px;
+      z-index: 0;
+      margin-bottom: 15px;
+  }
+
+  .glow-button button {
+      background: transparent; 
+      border: none; 
+      color: white; 
+      padding: 5px 10px; 
+      font-size: 16px; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      outline: none; 
+  }
+
+  .glow-button:before {
+      content: "";
+      background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      background-size: 400%;
+      z-index: -1;
+      filter: blur(5px);
+      -webkit-filter: blur(5px);
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      animation: glowing-button-85 20s linear infinite;
+      transition: opacity 0.3s ease-in-out;
+      border-radius: 10px;
+  }
+
+  @keyframes glowing-button-85 {
+      0% { background-position: 0 0; }
+      50% { background-position: 400% 0; }
+      100% { background-position: 0 0; }
+  }
+
+  .glow-button:after {
+      z-index: -1;
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #222;
+      left: 0;
+      top: 0;
+      border-radius: 10px;
+  }
+</style>
+
+<style>
+  .container_teaser {
+      display: flex; /* Enables Flexbox */
+      justify-content: center; /* Horizontally centers the content */
+      align-items: center; /* Vertically centers the content */
+      height: 100%; /* Set the height of the container */
+  }
+
+  .column_teaser {
+      flex: 0 0 auto; /* This ensures that the column doesn't grow or shrink */
+      width: 100%; /* Adjust this width as needed */
+      max-width: 800px; /* Adjust this max-width as needed */
+      margin: 0 auto; /* Centers the column within the container */
+  }
+</style>
+  <script
+  defer
+  src="./static/js/image-comparison-slider.js"
+  ></script>
+  <link
+    rel="stylesheet"
+    href="./static/css/image-comparison-slider.css"
+  />
+
+</head>
+<body>
+</head>
+<body>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Expressive Gaussian Human Avatars from Monocular RGB Video</h1>
+            <style>
+              .author-block {
+                  margin-right: 10px;
+              }
+            </style>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://alexhu.top/">Hezhen Hu</a><sup>1</sup>,</span>
+              <span class="author-block">
+                <a href="https://zhiwenfan.github.io/">Zhiwen Fan</a><sup>1</sup>,</span>
+              <span class="author-block">
+                <a href="https://chikayan.github.io/">Tianhao Wu</a><sup>2</sup>,</span>
+              <span class="author-block">
+                <a href="">Yihan Xi</a><sup>1</sup>,</span>
+              <span class="author-block"> 
+                <a href="https://seoyoung1215.github.io/">Seoyoung Lee</a><sup>1</sup>,</span> <br>
+              <span class="author-block"> 
+                <a href="https://geopavlakos.github.io/">Georgios Pavlakos</a><sup>1</sup>,</span>
+              <span class="author-block">
+                <a href="https://www.ece.utexas.edu/people/faculty/atlas-wang">Zhangyang Wang</a><sup>1</sup>,</span>
+              </span>
+            </div>
+          <style>
+            .univerity-block {
+                margin-right: 14px;
+            }
+          </style>
+          <div class="is-size-5 publication-authors">
+            <span class="univerity-block"><sup>1</sup>University of Texas at Austin</span>
+            <span class="univerity-block"><sup>2</sup>Unveristy of Cambridge</span>
+          </div>
+        
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Video Link.
+              <span class="link-block">
+                <a href="https://www.youtube.com/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-youtube"></i>
+                  </span>
+                  <span>Video</span>
+                </a>
+              </span> -->
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code (coming soon)</span>
+                  </a>
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <figure class="image is-centered" style="width: 100%;">
+          <img src="./media/pipeline/Figure0.jpg" alt="Pipeline Image">
+        </figure>
+      </div>
+    </div>
+    <div class="content has-text-justified">
+      <p>
+        Overview of the proposed EVA framework. 
+        Given a real-world monocular RGB video, EVA first prepares well-aligned SMPL-X mesh via a plug-and-play module. 
+        Then EVA utilizes 3D Gaussians Splatting to perform avatar modeling, with the prior incorporated from the SMPL-X model. <br> <br>
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Nuanced expressiveness, particularly through fine-grained hand and facial expressions, is pivotal for enhancing the realism and vitality of digital human representations.
+            In this work, we focus on investigating the expressiveness of human avatars when learned from monocular RGB video; a setting that introduces new challenges in capturing and animating fine-grained details.
+            To this end, we introduce EVA, a drivable human model that meticulously sculpts fine details based on 3D Gaussians and SMPL-X, an expressive parametric human model.
+            Focused on enhancing expressiveness, our work makes three key contributions.
+            First, we highlight the critical importance of aligning the SMPL-X model with RGB frames for effective avatar learning.
+            Recognizing the limitations of current SMPL-X prediction methods for in-the-wild videos, we introduce a plug-and-play module that significantly ameliorates misalignment issues.
+            Second, we propose a context-aware adaptive density control strategy, which is adaptively adjusting the gradient thresholds to accommodate the varied granularity across body parts.
+            Last but not least, we develop a feedback mechanism that predicts per-pixel confidence to better guide the learning of 3D Gaussians.
+            Extensive experiments on two benchmarks demonstrate the superiority of our framework both quantitatively and qualitatively, especially on the fine-grained hand and facial details.
+          </p>
+          
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+  </div>
+</section>
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered">Approach</h2>
+    <div class="content has-text-justified">
+      <div class="columns is-centered">
+        <figure class="image is-centered">
+          <img src="./media/pipeline/Figure1.jpg" alt="Pipeline Image">
+        </figure>
+      </div>
+      <p>
+        Overview of the proposed EVA framework. 
+        Given a real-world monocular RGB video, EVA first prepares well-aligned SMPL-X mesh via a plug-and-play module. 
+        Then EVA utilizes 3D Gaussians Splatting to perform avatar modeling, with the prior incorporated from the SMPL-X model. <br> <br>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h3 class="title is-3">Qualitative Comparison</h3>
+    <div class="content has-text-justified">
+    <p>
+      Comparison with one of the SOTA method (GART). The first two rows correpond to the avatars learned from in-the-wild video, while the last row shows the avatar learned from well-annotated controlled dataset. <br> 
+    </p>
+    </div>
+  <div class="container is-max-desktop">
+    <div class="columns is-centered is-multiline">
+
+      <div class="column is-half">
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/final/00010_1.png">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/final/00010_3.png">
+          </img-comparison-slider>
+        </div>
+      </div>
+      
+      <div class="column is-half">
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/final/00111_1.png">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/final/00111_3.png">
+          </img-comparison-slider>
+        </div>
+      </div>
+      
+      <div class="column is-half">
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/final/00004_1.png">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/final/00004_3.png">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      <div class="column is-half">
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/final/00013_1.png">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/final/00013_3.png">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      <div class="column is-half">
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/final/00065_1.png">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/final/00065_3.png">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+      <div class="column is-half">
+        <div>
+          <img-comparison-slider>
+            <figure slot="first" class="before">
+              <img width="100%" src="./media/final/00152_1.png">
+            </figure>
+            <figure slot="second" class="after">
+              <img width="100%" src="./media/final/00152_3.png">
+          </img-comparison-slider>
+        </div>
+      </div>
+
+    <style>
+      .before,
+      .after {
+        margin: 0;
+      }
+    
+      .before figcaption,
+      .after figcaption {
+        background: #fff;
+        border: 1px solid #c0c0c0;
+        border-radius: 4px;
+        color: #2e3452;
+        opacity: 0.8;
+        padding: 4px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 100%;
+      }
+    
+      .before figcaption {
+        left: 4px;
+      }
+    
+      .after figcaption {
+        right: 4px;
+      }
+    </style>
+  </div>
+</section>
+
+
+<section class="section">
+    <div class="container is-max-desktop">
+    <h3 class="title is-3">Applications</h3>
+    <div class="content has-text-justified">
+    </div>
+    
+    <h3 class="title is-4">Novel view synthesis</h3>
+    <div class="columns is-centered">
+      <div class="column">
+        <div class="content">
+          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+            <source src="./media/novel_view/00035_69.mp4"
+            type="video/mp4">
+          </video>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="content">
+          <video id="matting-video" autoplay controls muted loop playsinline width="100%">
+            <source src="./media/novel_view/00086_139.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="content">
+          <video id="matting-video" autoplay controls muted loop playsinline width="100%">
+            <source src="./media/novel_view/00088_97.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+
+      <h3 class="title is-4">Novel pose synthesis</h3>
+      <div class="columns is-centered">
+        <div class="column">
+          <div class="content">
+            <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+              <source src="./media/novel_pose/00035.mp4"
+              type="video/mp4">
+            </video>
+          </div>
+        </div>
+  
+        <div class="column">
+          <div class="columns is-centered">
+            <div class="column content">
+              <video id="matting-video" autoplay controls muted loop playsinline height="100%">
+                <source src="./media/novel_pose/00086.mp4"
+                type="video/mp4">
+              </video>
+            </div>
+          </div>
+        </div>
+  
+        <div class="column">
+          <div class="columns is-centered">
+            <div class="column content">
+              <video id="matting-video" autoplay controls muted loop playsinline height="100%">
+                <source src="./media/novel_pose/00088.mp4"
+                type="video/mp4">
+              </video>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <h3 class="title is-4">Novel pose synthesis</h3>
+        <p>
+          Driven by unseen in-the-wild SMPLX sequence from unseen identity.
+        </p>
+      <div class="columns is-centered">
+        <div class="column">
+          <div class="content">
+            <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
+              <source src="./media/real_world/co_animate.mp4"
+              type="video/mp4">
+            </video>
+          </div>
+        </div>
+  
+        </div>
+      
+
+    <style>
+      .before,
+      .after {
+        margin: 0;
+      }
+    
+      .before figcaption,
+      .after figcaption {
+        background: #fff;
+        border: 1px solid #c0c0c0;
+        border-radius: 4px;
+        color: #2e3452;
+        opacity: 0.8;
+        padding: 4px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 100%;
+      }
+    
+      .before figcaption {
+        left: 4px;
+      }
+    
+      .after figcaption {
+        right: 4px;
+      }
+    </style>
+  </div>
+</section>
+
+
+
+
+
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{hu2024expressive,
+  author    = {Hu, Hezhen and Fan, Zhiwen and Wu, Tianhao and Xi, Yihan and Lee, Seoyoung and Pavlakos, Georgios and Wang, Zhangyang},
+  title     = {Expressive Gaussian Human Avatars from Monocular RGB Video},
+  journal   = {arXiv},
+  year      = {2024},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Source code borrowed from <a
+              href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleSliders() {
+      // Get both slider containers
+      var slider1 = document.getElementById("slider1-container_teaser");
+      var slider2 = document.getElementById("slider2-container_teaser");
+
+      // Toggle visibility
+      if (slider1.style.display === "none") {
+          slider1.style.display = "block";
+          slider2.style.display = "none";
+      } else {
+          slider1.style.display = "none";
+          slider2.style.display = "block";
+      }
+  }
+</script>
+
+</body>
+</html>
